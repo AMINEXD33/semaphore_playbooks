@@ -21,4 +21,4 @@
       delegate_to: localhost
       ansible.builtin.copy:
         content: "{{ switch_config.stdout[0] }}"
-        dest: "/home/dxc-network/Bureau/{{ inventory_hostname }}.cfg"
+        dest: "/home/dxc-network/Bureau/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}.cfg"
