@@ -1,5 +1,5 @@
 - name: GETTING CONFIGURATION BACKUP
-  hosts: SWITCH_CORE
+  hosts: all
   gather_facts: false
   become: true                    # Tell Ansible we need privilege escalation
   become_method: ansible.netcommon.enable  # <--- CRITICAL: Use Cisco 'enable' mode instead of Linux 'sudo'
