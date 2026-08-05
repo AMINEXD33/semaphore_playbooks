@@ -1,0 +1,22 @@
+- name: GETTING CONFIGURATION BACKUP
+  hosts: DC_SWITCHES          # Targets the inventory group matching your vault
+  become: true                # Automatically runs commands as root (sudo) via SSH
+  
+
+- name: GETTING CONFIGURATION BACKUP
+  hosts: SWITCH_CORE
+  gather_facts: true
+
+  tasks:
+    - name: Get running configuration from Cisco switch
+      cisco.ios.ios_command:       # <--- USE THIS NETWORK MODULE
+        commands:
+          - show running-config    # Note: Cisco uses a hyphen (running-config)
+      register: switch_config      # Saves the configuration text into memory
+
+    # (Optional) Save that configuration to your local backups directory
+    - name: Save configuration backup to local file
+      delegate_to: localhost
+      ansible.builtin.copy:
+        content: "{{ switch_config.stdout[0] }}"
+        dest: "/home/dxc-network/Bureau/{{ inventory_hostname }}.cfg"
