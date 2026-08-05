@@ -1,6 +1,7 @@
 - name: GETTING CONFIGURATION BACKUP
   hosts: SWITCH_CORE
   become: true                # Automatically runs commands as root (sudo) via SSH
+  become_method: ansible.netcommon.enable
   gather_facts: false
   vars:
     ansible_network_os: cisco.ios        # Forces Cisco profile globally
