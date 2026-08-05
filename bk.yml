@@ -1,7 +1,7 @@
 - name: GETTING CONFIGURATION BACKUP
   hosts: DC_SWITCHES          # Targets the inventory group matching your vault
   become: true                # Automatically runs commands as root (sudo) via SSH
-  
+  gather_facts: false
 
 - name: GETTING CONFIGURATION BACKUP
   hosts: SWITCH_CORE
