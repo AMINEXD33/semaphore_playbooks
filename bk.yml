@@ -1,20 +1,19 @@
 - name: GETTING CONFIGURATION BACKUP
   hosts: SWITCH_CORE
-  become: true                # Automatically runs commands as root (sudo) via SSH
-  become_method: ansible.netcommon.enable
   gather_facts: false
+  become: true                    # Tell Ansible we need privilege escalation
+  become_method: ansible.netcommon.enable  # <--- CRITICAL: Use Cisco 'enable' mode instead of Linux 'sudo'
   vars:
-    ansible_network_os: cisco.ios        # Forces Cisco profile globally
+    ansible_network_os: cisco.ios
     ansible_connection: ansible.netcommon.network_cli
     
   tasks:
     - name: Get running configuration from Cisco switch
-      cisco.ios.ios_command:       # <--- USE THIS NETWORK MODULE
+      cisco.ios.ios_command:
         commands:
-          - show running-config    # Note: Cisco uses a hyphen (running-config)
-      register: switch_config      # Saves the configuration text into memory
+          - show running-config
+      register: switch_config
 
-    # (Optional) Save that configuration to your local backups directory
     - name: Save configuration backup to local file
       delegate_to: localhost
       ansible.builtin.copy:
