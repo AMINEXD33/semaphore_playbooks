@@ -2,7 +2,10 @@
   hosts: SWITCH_CORE          # Targets the inventory group matching your vault
   become: true                # Automatically runs commands as root (sudo) via SSH
   gather_facts: false
-
+  vars:
+    ansible_network_os: cisco.ios        # Forces Cisco profile globally
+    ansible_connection: ansible.netcommon.network_cli
+    
 - name: GETTING CONFIGURATION BACKUP
   hosts: SWITCH_CORE
   gather_facts: true
