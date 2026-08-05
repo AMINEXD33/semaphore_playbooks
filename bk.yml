@@ -3,10 +3,7 @@
   gather_facts: false
   become: true                    # Tell Ansible we need privilege escalation
   become_method: ansible.netcommon.enable  # <--- CRITICAL: Use Cisco 'enable' mode instead of Linux 'sudo'
-  vars:
-    ansible_network_os: cisco.ios
-    ansible_connection: ansible.netcommon.network_cli
-    
+
   tasks:
     - name: Get running configuration from Cisco switch
       cisco.ios.ios_command:
