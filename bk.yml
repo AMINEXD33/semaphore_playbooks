@@ -1,6 +1,5 @@
 - name: GETTING CONFIGURATION BACKUP
   hosts: SWITCH_CORE
-  gather_facts: true
   become: true                # Automatically runs commands as root (sudo) via SSH
   gather_facts: false
   vars:
