@@ -1,5 +1,5 @@
 - name: GETTING CONFIGURATION BACKUP
-  hosts: all
+  hosts: "FORTIGATE_DC"
   gather_facts: false
 
   vars:
