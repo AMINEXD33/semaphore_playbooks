@@ -1,6 +1,6 @@
 
 - name: GETTING CONFIGURATION BACKUP
-  hosts: all
+  hosts: "SWITCH_CORE"
   gather_facts: false
 
   vars:
