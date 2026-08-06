@@ -10,7 +10,7 @@
     ansible_terminal_initial_answer: 'a'
     
   tasks:
-    - name: Get running configuration from Cisco switch
+    - name: Get running configuration from Fortigate 
       ansible.netcommon.cli_command:
       command: get system status
       register: froti_config
