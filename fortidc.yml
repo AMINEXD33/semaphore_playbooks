@@ -1,25 +1,30 @@
-- name: GETTING CONFIGURATION BACKUP
-  hosts: "FORTIGATE_DC"
+---
+- name: BACKUP FORTIGATE CONFIGURATION
+  hosts: FORTIGATE_DC
   gather_facts: false
-  
-  vars:
-    # 1. Use the community driver for SSH (official fortinet.fortios is API-only)
-    ansible_network_os: community.network.fortios
-    ansible_connection: ansible.netcommon.network_cli
-    ansible_become: no
+  connection: local  # Critical: Run from the runner, do not use network_cli
 
-    # 2. This regex handles the "Press 'a' to accept" banner
-    ansible_terminal_initial_prompt: '(?i).*Press.*a.*to accept.*'
-    ansible_terminal_initial_answer: 'a'
+  vars:
+    ansible_python_interpreter: auto_silent
 
   tasks:
-    - name: Get running configuration from Fortigate
-      ansible.netcommon.cli_command:
-        command: show full-configuration
+    - name: SSH, Accept Banner, and Get Config
+      ansible.builtin.expect:
+        # -T disables TTY to prevent hanging in Semaphore/CI environments
+        command: "ssh -T -o StrictHostKeyChecking=no {{ ansible_user }}@{{ ansible_host }}"
+        timeout: 30
+        responses:
+          # Handle Password
+          '(?i)password:': "{{ ansible_ssh_pass }}"
+          
+          # Handle 'Press a to accept' banner (case insensitive)
+          '(?i)Press.*a.*to accept': "a"
+          
+          # Handle the command prompt and send backup command
+          '# $': "show full-configuration"
       register: fgt_config
 
-    - name: Save configuration backup to local file
-      delegate_to: localhost
+    - name: Save configuration to local file
       ansible.builtin.copy:
         content: "{{ fgt_config.stdout }}"
         dest: "/home/dxc-network/Bureau/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y_%m_%d___%H_%M_%S') }}.cfg"
