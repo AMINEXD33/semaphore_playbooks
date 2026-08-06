@@ -7,7 +7,7 @@
     - name: Run SSH with sshpass to bypass TTY restrictions
       ansible.builtin.expect:
         # sshpass takes the password directly from the variable and feeds it to SSH
-        command: "sshpass -p '{{ ansible_password }}' ssh -T -o StrictHostKeyChecking=no {{ ansible_user }}@{{ ansible_host }}"
+        command: "sshpass -p '{{ forti_password }}' ssh -T -o StrictHostKeyChecking=no {{ forti_username }}@{{ ansible_host }}"
         timeout: 30
         responses:
           # Now it skips the password prompt instantly and waits for the firewall prompt
