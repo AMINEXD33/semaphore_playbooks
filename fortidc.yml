@@ -6,20 +6,11 @@
     ansible_network_os: fortinet.fortios.fortios
     ansible_httpapi_use_ssl: true
     ansible_httpapi_validate_certs: false
+
   tasks:
-    - name: Export running config as playbook/backup
+    - name: Export running configuration
       fortinet.fortios.fortios_export_config_playbook:
-      register: fgt_backup
-
-
-  - name: Export running configuration
-    fortinet.fortios.fortios_export_config_playbook:
-      selectors:
-        - selector: system.status   # or firewall_address, system.interface, etc.
-      output_path: "/home/dxc-network/Bureau"
-    register: fgt_export
-    # - name: Save configuration backup to local file
-    #   delegate_to: localhost
-    #   ansible.builtin.copy:
-    #     content: "{{ fgt_config.stdout }}"
-    #     dest: "/home/dxc-network/Bureau/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y_%m_%d___%H_%M_%S') }}.cfg"
+        selectors:
+          - selector: system.status
+        output_path: "/home/dxc-network/Bureau"
+      register: fgt_export
