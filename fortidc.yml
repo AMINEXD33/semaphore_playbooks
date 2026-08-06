@@ -1,30 +1,20 @@
----
 - name: BACKUP FORTIGATE CONFIGURATION
-  hosts: FORTIGATE_DC
+  hosts: "FORTIGATE_DC"
   gather_facts: false
-  connection: local  # Critical: Run from the runner, do not use network_cli
-
-  vars:
-    ansible_python_interpreter: auto_silent
+  connection: local
 
   tasks:
-    - name: SSH, Accept Banner, and Get Config
+    - name: Run SSH with sshpass to bypass TTY restrictions
       ansible.builtin.expect:
-        # -T disables TTY to prevent hanging in Semaphore/CI environments
-        command: "ssh -T -o StrictHostKeyChecking=no {{ ansible_user }}@{{ ansible_host }}"
+        # sshpass takes the password directly from the variable and feeds it to SSH
+        command: "sshpass -p '{{ ansible_password }}' ssh -T -o StrictHostKeyChecking=no {{ ansible_user }}@{{ ansible_host }}"
         timeout: 30
         responses:
-          # Handle Password
-          '(?i)password:': "{{ ansible_ssh_pass }}"
-          
-          # Handle 'Press a to accept' banner (case insensitive)
-          '(?i)Press.*a.*to accept': "a"
-          
-          # Handle the command prompt and send backup command
+          # Now it skips the password prompt instantly and waits for the firewall prompt
           '# $': "show full-configuration"
       register: fgt_config
 
-    - name: Save configuration to local file
+    - name: Save configuration backup to local file
       ansible.builtin.copy:
         content: "{{ fgt_config.stdout }}"
         dest: "/home/dxc-network/Bureau/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y_%m_%d___%H_%M_%S') }}.cfg"
