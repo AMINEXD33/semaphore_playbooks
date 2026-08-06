@@ -12,7 +12,7 @@
     - name: Backup full running configuration
       fortinet.fortios.fortios_monitor:
         vdom: "root"
-        selector: "backup"
+        selector: "backup.system.config"
         selector_params:
           scope: "global"
       register: fgt_backup
