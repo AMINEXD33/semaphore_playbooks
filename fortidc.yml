@@ -2,7 +2,8 @@
   hosts: FORTIGATE_DC
   gather_facts: false
   vars:
-    ansible_network_os: fortinet.fortios.fortios
+    ansible_network_os: fortios
+    ansible_connection: ansible.netcommon.network_cli
     ansible_connection: ansible.netcommon.network_cli
     ansible_httpapi_use_ssl: true
     ansible_httpapi_validate_certs: false
