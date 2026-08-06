@@ -9,20 +9,13 @@
     ansible_command_timeout: 90
 
   tasks:
-    - name: Backup full running configuration
-      fortinet.fortios.fortios_monitor:
-        vdom: "root"
-        selector: "backup.system.config"
-        params:
-          scope: "global"
-      register: fgt_backup
-    
-    - name: Show raw structure
-      ansible.builtin.debug:
-        var: fgt_backup
+    - name: Run show full-configuration on FortiGate
+      ansible.netcommon.cli_command:
+        command: show full-configuration
+      register: backup_output
 
-    - name: Save backup to local file
-      delegate_to: localhost
+    - name: Save configuration to a local file
       ansible.builtin.copy:
-        content: "{{ fgt_backup.meta.results if fgt_backup.meta is defined else fgt_backup }}"
-        dest: "/home/dxc-network/Bureau/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y_%m_%d___%H_%M_%S') }}.conf"
+        content: "{{ backup_output.stdout }}"
+        dest: "./{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}.conf"
+      delegate_to: localhost
