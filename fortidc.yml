@@ -6,13 +6,19 @@
     ansible_network_os: fortinet.fortios.fortios
     ansible_httpapi_use_ssl: true
     ansible_httpapi_validate_certs: false
-    ansible_httpapi_use_ssl: true
-    ansible_httpapi_validate_certs: false
-    ansible_command_timeout: 120
+    ansible_command_timeout: 90
+
   tasks:
-    - name: Export running configuration
-      fortinet.fortios.fortios_export_config_playbook:
-        selectors:
-          - selector: system_status
-        output_path: "/home/dxc-network/Bureau"
-      register: fgt_export
+    - name: Backup full running configuration
+      fortinet.fortios.fortios_monitor:
+        vdom: "root"
+        selector: "backup"
+        selector_params:
+          scope: "global"
+      register: fgt_backup
+
+    - name: Save backup to local file
+      delegate_to: localhost
+      ansible.builtin.copy:
+        content: "{{ fgt_backup.meta.results if fgt_backup.meta is defined else fgt_backup }}"
+        dest: "/home/dxc-network/Bureau/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y_%m_%d___%H_%M_%S') }}.conf"
