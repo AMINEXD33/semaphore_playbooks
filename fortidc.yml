@@ -6,7 +6,9 @@
     ansible_network_os: fortinet.fortios.fortios
     ansible_httpapi_use_ssl: true
     ansible_httpapi_validate_certs: false
-
+    ansible_httpapi_use_ssl: true
+    ansible_httpapi_validate_certs: false
+    ansible_command_timeout: 120
   tasks:
     - name: Export running configuration
       fortinet.fortios.fortios_export_config_playbook:
