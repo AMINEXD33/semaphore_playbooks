@@ -1,18 +1,15 @@
 - name: GETTING CONFIGURATION BACKUP
-  hosts: "FORTIGATE_DC"
+- hosts: FORTIGATE_DC
   gather_facts: false
   vars:
-    ansible_connection: ansible.netcommon.network_cli
+    ansible_connection: ansible.netcommon.httpapi
     ansible_network_os: fortinet.fortios.fortios
-    ansible_become: no
-    ansible_terminal_initial_prompt: '.*[Pp]ress.*[Aa].*to accept.*'
-    ansible_terminal_initial_answer: 'a'
-
+    ansible_httpapi_use_ssl: true
+    ansible_httpapi_validate_certs: false
   tasks:
-    - name: Get running configuration from Fortigate
-      ansible.netcommon.cli_command:
-        command: show full-configuration
-      register: fgt_config
+    - name: Export running config as playbook/backup
+      fortinet.fortios.fortios_export_config_playbook:
+      register: fgt_backup
 
     - name: Save configuration backup to local file
       delegate_to: localhost
