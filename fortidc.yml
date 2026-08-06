@@ -1,22 +1,33 @@
-- name: GETTING CONFIGURATION BACKUP
+- name: BACKUP FORTIGATE CONFIGURATION
   hosts: FORTIGATE_DC
   gather_facts: false
+  
   vars:
-    ansible_network_os: fortios
+    # Use network_cli to drive the SSH connection
     ansible_connection: ansible.netcommon.network_cli
-    ansible_connection: ansible.netcommon.network_cli
-    ansible_httpapi_use_ssl: true
-    ansible_httpapi_validate_certs: false
-    ansible_command_timeout: 90
+    # Requires 'fortinet.fortios' collection installed
+    ansible_network_os: fortinet.fortios.fortios
+    ansible_become: no
+    
+    # regex matches: "Press" ... "a" ... "to accept" (case insensitive)
+    ansible_terminal_initial_prompt: '(?i).*Press.*a.*to accept.*'
+    ansible_terminal_initial_answer: 'a'
 
   tasks:
-    - name: Run show full-configuration on FortiGate
+    - name: Get running configuration from Fortigate
       ansible.netcommon.cli_command:
         command: show full-configuration
-      register: backup_output
+      register: fgt_config
 
-    - name: Save configuration to a local file
-      ansible.builtin.copy:
-        content: "{{ backup_output.stdout }}"
-        dest: "./{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}.conf"
+    - name: Ensure backup directory exists
       delegate_to: localhost
+      ansible.builtin.file:
+        path: "/home/dxc-network/Bureau"
+        state: directory
+        mode: '0755'
+
+    - name: Save configuration backup to local file
+      delegate_to: localhost
+      ansible.builtin.copy:
+        content: "{{ fgt_config.stdout }}"
+        dest: "/home/dxc-network/Bureau/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y_%m_%d___%H_%M_%S') }}.cfg"
