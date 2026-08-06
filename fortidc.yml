@@ -11,7 +11,7 @@
         timeout: 30
         responses:
           '\(Press ''a'' to accept\):': "a"
-          '# $': "show full-configuration"
+          '\\$ $': "show full-configuration"
       register: fgt_config
 
     - name: Save configuration backup to local file
