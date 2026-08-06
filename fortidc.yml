@@ -1,22 +1,21 @@
 - name: GETTING CONFIGURATION BACKUP
   hosts: "FORTIGATE_DC"
   gather_facts: false
-
   vars:
     ansible_connection: ansible.netcommon.network_cli
     ansible_network_os: fortinet.fortios.fortios
     ansible_become: no
     ansible_terminal_initial_prompt: '.*[Pp]ress.*[Aa].*to accept.*'
     ansible_terminal_initial_answer: 'a'
-    
+
   tasks:
-    - name: Get running configuration from Fortigate 
+    - name: Get running configuration from Fortigate
       ansible.netcommon.cli_command:
-      command: get system status
-      register: froti_config
+        command: show full-configuration
+      register: fgt_config
 
     - name: Save configuration backup to local file
       delegate_to: localhost
       ansible.builtin.copy:
-        content: "{{ FORTIGATE_DC.stdout[0] }}"
+        content: "{{ fgt_config.stdout }}"
         dest: "/home/dxc-network/Bureau/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y_%m_%d___%H_%M_%S') }}.cfg"
