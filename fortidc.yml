@@ -10,7 +10,7 @@
         command: "sshpass -p '{{ forti_password }}' ssh -T -o StrictHostKeyChecking=no {{ forti_username }}@{{ ansible_host }}"
         timeout: 30
         responses:
-          # Now it skips the password prompt instantly and waits for the firewall prompt
+          '\(Press ''a'' to accept\):': "a"
           '# $': "show full-configuration"
       register: fgt_config
 
