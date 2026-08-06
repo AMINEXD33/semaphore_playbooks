@@ -1,3 +1,5 @@
 collections:
   - name: cisco.ios
   - name: ansible.netcommon
+  - name: fortinet.fortios
+  - name: ansible.netcommon
