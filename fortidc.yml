@@ -13,9 +13,13 @@
       fortinet.fortios.fortios_monitor:
         vdom: "root"
         selector: "backup.system.config"
-        selector_params:
+        params:
           scope: "global"
       register: fgt_backup
+    
+    - name: Show raw structure
+      ansible.builtin.debug:
+        var: fgt_backup
 
     - name: Save backup to local file
       delegate_to: localhost
