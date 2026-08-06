@@ -1,5 +1,5 @@
 - name: GETTING CONFIGURATION BACKUP
-- hosts: FORTIGATE_DC
+  hosts: FORTIGATE_DC
   gather_facts: false
   vars:
     ansible_connection: ansible.netcommon.httpapi
