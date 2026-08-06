@@ -11,6 +11,6 @@
     - name: Export running configuration
       fortinet.fortios.fortios_export_config_playbook:
         selectors:
-          - selector: system.status
+          - selector: system_status
         output_path: "/home/dxc-network/Bureau"
       register: fgt_export
