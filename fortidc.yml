@@ -2,12 +2,14 @@
   hosts: FORTIGATE_DC
   gather_facts: false
   connection: local
+
   vars:
     fgt_user: "{{ forti_username }}"
     fgt_pass: "{{ forti_password }}"
     backup_dir: "/home/dxc-network/Bureau"
 
   tasks:
+
     - name: Ensure backup directory exists
       ansible.builtin.file:
         path: "{{ backup_dir }}"
@@ -15,48 +17,50 @@
         mode: "0750"
 
     - name: Pull full configuration over SSH
-  ansible.builtin.shell: |
-    expect -c '
-      spawn sshpass -p "{{ fgt_pass }}" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 {{ fgt_user }}@{{ ansible_host | default(inventory_hostname) }}
+      ansible.builtin.shell: |
+        expect -c '
+          spawn sshpass -p "{{ fgt_pass }}" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 {{ fgt_user }}@{{ ansible_host | default(inventory_hostname) }}
 
-      expect {
-        -re ".*[Aa].*" {
-          send "a\r"
-        }
-        timeout {
-          exit 1
-        }
-      }
+          expect {
+            "(a)" {
+              send "a\r"
+            }
+            "#" {
+            }
+            timeout {
+              exit 1
+            }
+          }
 
-      expect "#"
+          expect "#"
 
-      send "config system console\r"
-      expect "#"
+          send "config system console\r"
+          expect "#"
 
-      send "set output standard\r"
-      expect "#"
+          send "set output standard\r"
+          expect "#"
 
-      send "end\r"
-      expect "#"
+          send "end\r"
+          expect "#"
 
-      send "show full-configuration\r"
+          send "show full-configuration\r"
 
-      expect eof
-    ' | sed -n '/#config-version=/,$p'
-  register: fgt_config
-  changed_when: false
-  no_log: true
+          expect eof
+        ' | sed -n '/#config-version=/,$p'
+      register: fgt_config
+      changed_when: false
+      no_log: true
 
-- name: Fail loudly if output looks empty or wrong
-  ansible.builtin.fail:
-    msg: >
-      Config pull returned suspiciously little output
-      ({{ fgt_config.stdout | length }} chars).
-      Check authentication, banner handling, or FortiGate CLI output.
-  when: fgt_config.stdout | length < 200
+    - name: Fail loudly if output looks empty or wrong
+      ansible.builtin.fail:
+        msg: >
+          Config pull returned suspiciously little output
+          ({{ fgt_config.stdout | length }} chars).
+          Check authentication, banner handling, or FortiGate CLI output.
+      when: fgt_config.stdout | length < 200
 
-- name: Save configuration backup to local file
-  ansible.builtin.copy:
-    content: "{{ fgt_config.stdout }}"
-    dest: "{{ backup_dir }}/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y_%m_%d___%H_%M_%S') }}.conf"
-    mode: "0640"
+    - name: Save configuration backup to local file
+      ansible.builtin.copy:
+        content: "{{ fgt_config.stdout }}"
+        dest: "{{ backup_dir }}/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y_%m_%d___%H_%M_%S') }}.conf"
+        mode: "0640"
