@@ -16,3 +16,8 @@
         validate_certs: false
         return_content: true
       register: fgt_config
+    - name: Save configuration backup
+      ansible.builtin.copy:
+        content: "{{ fgt_config.content }}"
+        dest: "{{ backup_dir }}/FortiGate_DC_{{ lookup('pipe', 'date +%Y-%m-%d_%H-%M-%S') }}.conf"
+        mode: "0640"
