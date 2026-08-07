@@ -22,5 +22,5 @@
     - name: Save configuration backup
       ansible.builtin.copy:
         content: "{{ fgt_config.content }}"
-        dest: "{{ backup_dir }}/FG-DC-CONFIG_{{ lookup('pipe', 'date +%Y-%m-%d_%H-%M-%S') }}.conf"
+        dest: "{{ backup_dir }}/FortiGate_CFC_{{ lookup('pipe', 'date +%Y-%m-%d_%H-%M-%S') }}.conf"
         mode: "0640"
