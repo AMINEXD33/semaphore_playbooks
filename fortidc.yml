@@ -16,10 +16,18 @@
 
     - name: Pull full configuration over SSH (exec mode, no interactive shell)
       ansible.builtin.shell: >
+        expect -c '
         sshpass -p '{{ fgt_pass }}'
-        ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15
-        {{ fgt_user }}@{{ ansible_host | default(inventory_hostname) }}
-        "config system console; set output standard; end; show full-configuration" | sed -n '/#config-version=/,$p' > /tmp/fgt_clean_test.conf
+        spawn ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 {{ fgt_user }}@{{ ansible_host | default(inventory_hostname) }}
+        expect "a"
+        send "a\r"
+        expect "#"
+        send "config system console\r"
+        send "set output standard\r"
+        send "end\r"
+        send "show full-configuration\r"
+        expect eof
+        ' | sed -n '/#config-version=/,$p' > /tmp/fgt_clean_test.conf
       register: fgt_config
       changed_when: false
       no_log: true
