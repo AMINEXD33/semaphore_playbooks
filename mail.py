@@ -42,4 +42,4 @@ def send_mail(to, subject, body):
         print(f"Send failed: {error}")
 
 if __name__ == "__main__":
-    send_mail("hooligans.hooligans22@example.com", "Test", "Hello from automation")
+    send_mail("hooligans.hooligans22@gmail.com", "Test", "Hello from automation")
