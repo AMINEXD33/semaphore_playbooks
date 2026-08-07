@@ -9,7 +9,7 @@
   tasks:
     - name: Get FortiGate configuration
       ansible.builtin.uri:
-        url: "https://{{ ansible_host }}:{{ forti_port }}/api/v2/monitor/system/config/backup?scope=vdom&vdom=root"
+        url: "https://{{ ansible_host }}:{{ forti_port }}/api/v2/monitor/system/config/backup?scope=global"
         method: GET
         headers:
           Authorization: "Bearer {{ api_key }}"
