@@ -14,33 +14,49 @@
         state: directory
         mode: "0750"
 
-    - name: Pull full configuration over SSH (exec mode, no interactive shell)
-      ansible.builtin.shell: >
-        expect -c '
-        sshpass -p '{{ fgt_pass }}'
-        spawn ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 {{ fgt_user }}@{{ ansible_host | default(inventory_hostname) }}
-        expect "a"
-        send "a\r"
-        expect "#"
-        send "config system console\r"
-        send "set output standard\r"
-        send "end\r"
-        send "show full-configuration\r"
-        expect eof
-        ' | sed -n '/#config-version=/,$p' > /tmp/fgt_clean_test.conf
-      register: fgt_config
-      changed_when: false
-      no_log: true
+    - name: Pull full configuration over SSH
+  ansible.builtin.shell: |
+    expect -c '
+      spawn sshpass -p "{{ fgt_pass }}" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 {{ fgt_user }}@{{ ansible_host | default(inventory_hostname) }}
 
-    - name: Fail loudly if output looks empty or wrong (sanity check)
-      ansible.builtin.fail:
-        msg: >
-          Config pull returned suspiciously little output ({{ fgt_config.stdout | length }} chars).
-          Check auth, banner handling, or whether the disclaimer intercepted the session.
-      when: fgt_config.stdout | length < 200
+      expect {
+        -re ".*[Aa].*" {
+          send "a\r"
+        }
+        timeout {
+          exit 1
+        }
+      }
 
-    - name: Save configuration backup to local file
-      ansible.builtin.copy:
-        content: "{{ fgt_config.stdout }}"
-        dest: "{{ backup_dir }}/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y_%m_%d___%H_%M_%S') }}.conf"
-        mode: "0640"
+      expect "#"
+
+      send "config system console\r"
+      expect "#"
+
+      send "set output standard\r"
+      expect "#"
+
+      send "end\r"
+      expect "#"
+
+      send "show full-configuration\r"
+
+      expect eof
+    ' | sed -n '/#config-version=/,$p'
+  register: fgt_config
+  changed_when: false
+  no_log: true
+
+- name: Fail loudly if output looks empty or wrong
+  ansible.builtin.fail:
+    msg: >
+      Config pull returned suspiciously little output
+      ({{ fgt_config.stdout | length }} chars).
+      Check authentication, banner handling, or FortiGate CLI output.
+  when: fgt_config.stdout | length < 200
+
+- name: Save configuration backup to local file
+  ansible.builtin.copy:
+    content: "{{ fgt_config.stdout }}"
+    dest: "{{ backup_dir }}/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y_%m_%d___%H_%M_%S') }}.conf"
+    mode: "0640"
