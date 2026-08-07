@@ -1,31 +1,38 @@
----
-- name: BACKUP FORTIGATE CONFIGURATION
+- name: GETTING CONFIGURATION BACKUP
   hosts: FORTIGATE_DC
   gather_facts: false
   connection: local
+  vars:
+    fgt_user: "{{ forti_username }}"
+    fgt_pass: "{{ forti_password }}"
+    backup_dir: "/home/dxc-network/Bureau"
 
   tasks:
-    - name: Retrieve FortiGate configuration
-      ansible.builtin.expect:
-        command: >
-          ssh -tt
-          -o StrictHostKeyChecking=no
-          -o UserKnownHostsFile=/dev/null
-          {{ forti_username }}@{{ ansible_host }}
-        timeout: 300
-        echo: false
-        responses:
-          '(?i)password:': "{{ forti_password }}\n"
-          '\(Press ''a'' to accept\):': "a\n"
-          '.* \$': |
-            config system console
-            set output standard
-            end
-            show full-configuration
-            exit
-      register: fgt_config
+    - name: Ensure backup directory exists
+      ansible.builtin.file:
+        path: "{{ backup_dir }}"
+        state: directory
+        mode: "0750"
 
-    - name: Save configuration backup
+    - name: Pull full configuration over SSH (exec mode, no interactive shell)
+      ansible.builtin.shell: >
+        sshpass -p '{{ fgt_pass }}'
+        ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15
+        {{ fgt_user }}@{{ ansible_host | default(inventory_hostname) }}
+        "echo 'a'; config system console; set output standard; end; show full-configuration"
+      register: fgt_config
+      changed_when: false
+      no_log: true
+
+    - name: Fail loudly if output looks empty or wrong (sanity check)
+      ansible.builtin.fail:
+        msg: >
+          Config pull returned suspiciously little output ({{ fgt_config.stdout | length }} chars).
+          Check auth, banner handling, or whether the disclaimer intercepted the session.
+      when: fgt_config.stdout | length < 200
+
+    - name: Save configuration backup to local file
       ansible.builtin.copy:
         content: "{{ fgt_config.stdout }}"
-        dest: "/home/dxc-network/Bureau/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y_%m_%d___%H_%M_%S') }}.cfg"
+        dest: "{{ backup_dir }}/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y_%m_%d___%H_%M_%S') }}.conf"
+        mode: "0640"
