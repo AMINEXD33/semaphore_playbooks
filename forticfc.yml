@@ -7,17 +7,20 @@
     backup_dir: "/home/dxc-network/Bureau"
 
   tasks:
-    - name: Get FortiGate configuration
+    - name: Get FortiGate configuration backup
       ansible.builtin.uri:
         url: "https://{{ ansible_host }}:{{ forti_port }}/api/v2/monitor/system/config/backup?scope=global"
-        method: GET
+        method: POST
         headers:
           Authorization: "Bearer {{ api_key }}"
         validate_certs: false
         return_content: true
       register: fgt_config
+      changed_when: false
+      no_log: true
+    
     - name: Save configuration backup
       ansible.builtin.copy:
         content: "{{ fgt_config.content }}"
-        dest: "{{ backup_dir }}/FortiGate_CFC_{{ lookup('pipe', 'date +%Y-%m-%d_%H-%M-%S') }}.conf"
+        dest: "{{ backup_dir }}/FG-DC-CONFIG_{{ lookup('pipe', 'date +%Y-%m-%d_%H-%M-%S') }}.conf"
         mode: "0640"
