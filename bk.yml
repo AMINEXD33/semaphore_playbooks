@@ -9,16 +9,43 @@
     ansible_become: true
     ansible_become_method: enable
     ansible_become_password: "{{ vault_enable_password }}"
+    backup_dir: "/home/dxc-network/Bureau"
 
   tasks:
-    - name: Get running configuration from Cisco switch
-      cisco.ios.ios_command:
-        commands:
-          - show running-config
-      register: switch_config
+    - name: Backup Cisco switch
+      block:
+        - name: Get running configuration from Cisco switch
+          cisco.ios.ios_command:
+            commands:
+              - show running-config
+          register: switch_config
 
-    - name: Save configuration backup to local file
-      delegate_to: localhost
-      ansible.builtin.copy:
-        content: "{{ switch_config.stdout[0] }}"
-        dest: "/home/dxc-network/Bureau/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y_%m_%d___%H_%M_%S') }}.cfg"
+        - name: Save configuration backup to local file
+          delegate_to: localhost
+          ansible.builtin.copy:
+            content: "{{ switch_config.stdout[0] }}"
+            dest: "/home/dxc-network/Bureau/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y_%m_%d___%H_%M_%S') }}.cfg"
+        - name: Write SUCCESS result
+          ansible.builtin.copy:
+            content: "{{ {
+              'job': 'FortiGate DC Backup',
+              'status': 'SUCCESS',
+              'host': inventory_hostname,
+              'ip': ansible_host,
+              'timestamp': now().strftime('%Y-%m-%d %H:%M:%S')} | to_nice_json }}"
+            dest: "{{ backup_dir }}/backup_results/sw_code_prod.json"
+            mode: "0640"
+      rescue:
+        - name: Write FAILED result
+          ansible.builtin.copy:
+            content: "{{ {
+              'job': 'FortiGate DC Backup',
+              'status': 'FAILED',
+              'host': inventory_hostname,
+              'ip': ansible_host,
+              'timestamp': now().strftime('%Y-%m-%d %H:%M:%S')} | to_nice_json }}"
+            dest: "{{ backup_dir }}/backup_results/sw_code_prod.json"
+            mode: "0640"
+        - name: Fail the job
+          ansible.builtin.fail:
+            msg: "FortiGate configuration backup failed"
