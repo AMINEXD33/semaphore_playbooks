@@ -10,51 +10,36 @@
   tasks:
     - name: Backup FortiGate
       block:
+      - name: Save configuration backup
+        ansible.builtin.copy:
+          content: "{{ fgt_config.content }}"
+          dest: "{{ backup_dir }}/FortiGate_ONE_{{ now().strftime('%Y-%m-%d_%H-%M-%S') }}.conf"
+          mode: "0640"
+      
+      - name: Write SUCCESS result
+        ansible.builtin.copy:
+          content: "{{ {
+            'job': 'FortiGate DC Backup',
+            'status': 'SUCCESS',
+            'host': inventory_hostname,
+            'ip': ansible_host,
+            'timestamp': now().strftime('%Y-%m-%d %H:%M:%S')
+          } | to_nice_json }}"
+          dest: "/opt/semaphore/backup-results/fortigate_dc.json"
+          mode: "0640"
+    
+    rescue:
+    
+      - name: Write FAILED result
+        ansible.builtin.copy:
+          content: "{{ {
+            'job': 'FortiGate DC Backup',
+            'status': 'FAILED',
+            'host': inventory_hostname,
+            'ip': ansible_host,
+            'timestamp': now().strftime('%Y-%m-%d %H:%M:%S')
+          } | to_nice_json }}"
+          dest: "/opt/semaphore/backup-results/fortigate_dc.json"
+          mode: "0640"
 
-        - name: Get FortiGate configuration
-          ansible.builtin.uri:
-            url: "https://{{ ansible_host }}:{{ forti_port }}/api/v2/monitor/system/config/backup?scope=vdom&vdom=root"
-            method: GET
-            headers:
-              Authorization: "Bearer {{ api_key }}"
-            validate_certs: false
-            return_content: true
-          register: fgt_config
-          no_log: true
-
-        - name: Save configuration backup
-          ansible.builtin.copy:
-            content: "{{ fgt_config.content }}"
-            dest: "{{ backup_dir }}/FortiGate_ONE_{{ lookup('pipe', 'date +%Y-%m-%d_%H-%M-%S') }}.conf"
-            mode: "0640"
-
-        - name: Write SUCCESS result
-          ansible.builtin.copy:
-            content: "{{ {
-              'job': 'FortiGate DC Backup',
-              'status': 'SUCCESS',
-              'host': inventory_hostname,
-              'ip': ansible_host,
-              'timestamp': lookup('pipe', 'date +%Y-%m-%d %H:%M:%S')
-            } | to_nice_json }}"
-            dest: "/opt/semaphore/backup-results/fortigate_dc.json"
-            mode: "0640"
-
-      rescue:
-
-        - name: Write FAILED result
-          ansible.builtin.copy:
-            content: "{{ {
-              'job': 'FortiGate DC Backup',
-              'status': 'FAILED',
-              'host': inventory_hostname,
-              'ip': ansible_host,
-              'timestamp': lookup('pipe', 'date +%Y-%m-%d %H:%M:%S')
-            } | to_nice_json }}"
-            dest: "/opt/semaphore/backup-results/fortigate_dc.json"
-            mode: "0640"
-
-        - name: Fail the job
-          ansible.builtin.fail:
-            msg: "FortiGate configuration backup failed"
 
