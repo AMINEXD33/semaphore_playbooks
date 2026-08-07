@@ -1,45 +1,45 @@
 import os.path
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+import base64
+from email.mime.text import MIMEText
 
-# If modifying these scopes, delete the file token.json.
-SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
+SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
+TOKEN_PATH = "/home/dxc-network/Bureau/gmail/gmail.json"
 
+def get_credentials():
+    creds = None
+    if os.path.exists(TOKEN_PATH):
+        creds = Credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
 
-def main():
-  """Shows basic usage of the Gmail API.
-  Lists the user's Gmail labels.
-  """
-  creds = None
-  # The file token.json stores the user's access and refresh tokens, and is
-  # created automatically when the authorization flow completes for the first
-  # time.
-  if os.path.exists("/home/dxc-network/Bureau/gmail/gmail.json"):
-    creds = Credentials.from_authorized_user_file("/home/dxc-network/Bureau/gmail/gmail.json", SCOPES)
-  # If there are no (valid) credentials available, let the user log in.
-  if not creds or not creds.valid:
-    raise Exception("wrong creds")
-    
-  try:
-    # Call the Gmail API
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+            with open(TOKEN_PATH, "w") as f:
+                f.write(creds.to_json())
+        else:
+            raise Exception(
+                "token.json has no usable refresh_token. "
+                "Re-run generate_token.py locally and re-upload."
+            )
+    return creds
+
+def send_mail(to, subject, body):
+    creds = get_credentials()
     service = build("gmail", "v1", credentials=creds)
-    results = service.users().labels().list(userId="me").execute()
-    labels = results.get("labels", [])
 
-    if not labels:
-      print("No labels found.")
-      return
-    print("Labels:")
-    for label in labels:
-      print(label["name"])
+    message = MIMEText(body)
+    message["to"] = to
+    message["subject"] = subject
+    raw = base64.urlsafe_b64encode(message.as_bytes()).decode()
 
-  except HttpError as error:
-    # TODO(developer) - Handle errors from gmail API.
-    print(f"An error occurred: {error}")
-
+    try:
+        service.users().messages().send(userId="me", body={"raw": raw}).execute()
+        print("Sent.")
+    except HttpError as error:
+        print(f"Send failed: {error}")
 
 if __name__ == "__main__":
-  main()
+    send_mail("hooligans.hooligans22@example.com", "Test", "Hello from automation")
