@@ -7,11 +7,6 @@
     backup_dir: "/home/dxc-network/Bureau"
 
   tasks:
-    - name: Get FortiGate configuration
-      ansible.builtin.uri:
-        url: "https://{{ ansible_host }}:{{ forti_port }}/api/v2/..."
-        method: GET
-        headers:
-          Authorization: "Bearer {{ api_key }}"
-        validate_certs: false
-      register: fgt_config
+    - name: Check API token is injected
+      ansible.builtin.debug:
+        msg: "API token length: {{ api_key | length }}"
