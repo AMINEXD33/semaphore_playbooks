@@ -4,7 +4,7 @@
   connection: local
 
   vars:
-    backup_dir: "/home/dxc-network/Bureau/FortigateDC"
+    backup_dir: "/home/dxc-network/Bureau/equipments/FortigateDC"
 
   tasks:
     - name: Backup FortiGate
