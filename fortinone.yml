@@ -5,7 +5,7 @@
   connection: local
 
   vars:
-    backup_dir: "/home/dxc-network/Bureau/FortigateNONE"
+    backup_dir: "/home/dxc-network/Bureau/equipments/FortigateNONE"
 
   tasks:
 
