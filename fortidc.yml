@@ -4,7 +4,7 @@
   connection: local
 
   vars:
-    backup_dir: "/home/dxc-network/Bureau/equipments/FortigateDC"
+    backup_dir: "/home/dxc-network/Bureau"
 
   tasks:
     - name: Backup FortiGate
@@ -21,7 +21,7 @@
         - name: Save configuration backup
           ansible.builtin.copy:
             content: "{{ fgt_config.content }}"
-            dest: "{{ backup_dir }}/FortiGate_DC_{{ lookup('pipe', 'date +%Y-%m-%d_%H-%M-%S') }}.conf"
+            dest: "{{ backup_dir }}/equipments/FortigateDC/FortiGate_DC_{{ lookup('pipe', 'date +%Y-%m-%d_%H-%M-%S') }}.conf"
             mode: "0640"
         - name: Write SUCCESS result
           ansible.builtin.copy:
