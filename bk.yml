@@ -9,7 +9,7 @@
     ansible_become: true
     ansible_become_method: enable
     ansible_become_password: "{{ vault_enable_password }}"
-    backup_dir: "/home/dxc-network/Bureau/Cisco_core_prod/equipments"
+    backup_dir: "/home/dxc-network/Bureau/equipments/Cisco_core_prod"
 
   tasks:
     - name: Backup Cisco switch
