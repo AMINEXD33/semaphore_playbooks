@@ -14,7 +14,7 @@
             src: cs_backup.ucs
             dest: "{{ backup_dir }}/equipments/F5_prod/F5_PROD_{{ lookup('pipe', 'date +%Y-%m-%d_%H-%M-%S') }}.conf"
             provider:
-              server: "{{ ansible_host }}}"
+              server: "{{ ansible_host }}"
               user: "{{ f5_user }}"
               password: "{{ f5_pass }}"
             delegate_to: localhost
