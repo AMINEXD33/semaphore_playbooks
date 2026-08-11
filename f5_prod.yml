@@ -1,5 +1,5 @@
 - name: GETTING CONFIGURATION BACKUP
-  hosts: FORTIGATE_CFC
+  hosts: F5_PROD
   gather_facts: false
   connection: local
 
