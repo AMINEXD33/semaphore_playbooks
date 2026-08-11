@@ -3,3 +3,4 @@ collections:
   - name: ansible.netcommon
   - name: fortinet.fortios
   - name: ansible.netcommon
+  -name: f5networks.f5_modules version: ">=1.28.0"
