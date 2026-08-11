@@ -17,7 +17,7 @@
               server: "{{ ansible_host }}"
               user: "{{ f5_user }}"
               password: "{{ f5_pass }}"
-            delegate_to: localhost
+          delegate_to: localhost
         
         - name: Write SUCCESS result
           ansible.builtin.copy:
