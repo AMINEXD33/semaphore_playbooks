@@ -1,0 +1,40 @@
+- name: GETTING CONFIGURATION BACKUP
+  hosts: F5_NONE
+  gather_facts: false
+  connection: local
+
+  vars:
+    backup_dir: "/home/dxc-network/Bureau"
+
+  tasks:
+    - name: Backup FortiGate
+      block:
+        - name: Run F5 backup script
+          ansible.builtin.command:
+            cmd: "{{backup_dir}}/custom_scripts/f5_backup_via_sftp.sh {{ ansible_host }} {{ f5_user }} {{f5_pass}}"
+          no_log: false
+        
+        - name: Write SUCCESS result
+          ansible.builtin.copy:
+            content: "{{ {
+              'job': 'FortiGate DC Backup',
+              'status': 'SUCCESS',
+              'host': inventory_hostname,
+              'ip': ansible_host,
+              'timestamp': now().strftime('%Y-%m-%d %H:%M:%S')} | to_nice_json }}"
+            dest: "{{ backup_dir }}/backup_results/f5none.json"
+            mode: "0640"
+      rescue:
+        - name: Write FAILED result
+          ansible.builtin.copy:
+            content: "{{ {
+              'job': 'FortiGate DC Backup',
+              'status': 'FAILED',
+              'host': inventory_hostname,
+              'ip': ansible_host,
+              'timestamp': now().strftime('%Y-%m-%d %H:%M:%S')} | to_nice_json }}"
+            dest: "{{ backup_dir }}/backup_results/f5none.json"
+            mode: "0640"
+        - name: Fail the job
+          ansible.builtin.fail:
+            msg: "FortiGate configuration backup failed"
