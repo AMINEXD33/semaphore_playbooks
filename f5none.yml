@@ -37,4 +37,4 @@
             mode: "0640"
         - name: Fail the job
           ansible.builtin.fail:
-            msg: "FortiGate configuration backup failed"
+            msg: "F5 n+one configuration backup failed"
