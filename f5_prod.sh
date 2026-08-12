@@ -1,25 +1,40 @@
-#!/usr/bin/env bash
-set -euo pipefail
+- name: GETTING CONFIGURATION BACKUP
+  hosts: F5_PROD
+  gather_facts: false
+  connection: local
 
-F5_HOST="172.19.10.3"
-F5_USER="your_backup_user"
-UCS_NAME="backup_$(date +%Y%m%d_%H%M%S).ucs"
-REMOTE_UCS_DIR="/var/local/ucs"
-LOCAL_DEST="/path/to/local/backups"
+  vars:
+    backup_dir: "/home/dxc-network/Bureau"
 
-# 1. Create the UCS backup on the F5 over SSH
-ssh "${F5_USER}@${F5_HOST}" "tmsh save sys ucs ${UCS_NAME}"
-
-# 2. Pull it via SFTP
-sftp "${F5_USER}@${F5_HOST}" <<EOF
-get ${REMOTE_UCS_DIR}/${UCS_NAME} ${LOCAL_DEST}/${UCS_NAME}
-EOF
-
-# 3. Verify it actually landed locally before deleting remote copy
-if [[ -s "${LOCAL_DEST}/${UCS_NAME}" ]]; then
-    ssh "${F5_USER}@${F5_HOST}" "rm ${REMOTE_UCS_DIR}/${UCS_NAME}"
-    echo "Backup ${UCS_NAME} transferred and remote copy removed."
-else
-    echo "ERROR: local file missing or empty — NOT deleting remote backup." >&2
-    exit 1
-fi
+  tasks:
+    - name: Backup FortiGate
+      block:
+        - name: Run F5 backup script
+          ansible.builtin.command:
+            cmd: "{{backup_dir}}/custom_scripts/f5_backup_via_sftp.sh {{ ansible_host }} {{ f5_user }} {{f5_pass}}"
+          no_log: false
+        
+        - name: Write SUCCESS result
+          ansible.builtin.copy:
+            content: "{{ {
+              'job': 'FortiGate DC Backup',
+              'status': 'SUCCESS',
+              'host': inventory_hostname,
+              'ip': ansible_host,
+              'timestamp': now().strftime('%Y-%m-%d %H:%M:%S')} | to_nice_json }}"
+            dest: "{{ backup_dir }}/backup_results/f5prod.json"
+            mode: "0640"
+      rescue:
+        - name: Write FAILED result
+          ansible.builtin.copy:
+            content: "{{ {
+              'job': 'FortiGate DC Backup',
+              'status': 'FAILED',
+              'host': inventory_hostname,
+              'ip': ansible_host,
+              'timestamp': now().strftime('%Y-%m-%d %H:%M:%S')} | to_nice_json }}"
+            dest: "{{ backup_dir }}/backup_results/f5prod.json"
+            mode: "0640"
+        - name: Fail the job
+          ansible.builtin.fail:
+            msg: "FortiGate configuration backup failed"
