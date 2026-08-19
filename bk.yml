@@ -6,6 +6,7 @@
     ansible_connection: ansible.netcommon.network_cli
     ansible_network_os: cisco.ios.ios
     ansible_become: true
+    ansible_ssh_common_args: '-o PreferredAuthentications=password -o PubkeyAuthentication=no'
     ansible_become_method: enable
     ansible_become_password: "{{ vault_enable_password }}"
     backup_dir: "/home/dxc-network/Bureau/equipments/Cisco_core_prod"
