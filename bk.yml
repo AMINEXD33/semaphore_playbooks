@@ -7,8 +7,8 @@
     ansible_connection: ansible.netcommon.network_cli
     ansible_network_os: cisco.ios.ios
     ansible_become: true
-    ansible_user: "{{ vault_ssh_user }}"
-    ansible_password: "{{ vault_ssh_password }}"
+    ansible_user: "{{ ansible_user }}"
+    ansible_password: "{{ ansible_password }}"
     ansible_become_method: enable
     ansible_become_password: "{{ vault_enable_password }}"
     backup_dir: "/home/dxc-network/Bureau/"
