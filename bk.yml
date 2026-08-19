@@ -27,7 +27,7 @@
         - name: Write SUCCESS result
           ansible.builtin.copy:
             content: "{{ {
-              'job': 'FortiGate DC Backup',
+              'job': 'Prod switch dc backup',
               'status': 'SUCCESS',
               'host': inventory_hostname,
               'ip': ansible_host,
@@ -38,7 +38,7 @@
         - name: Write FAILED result
           ansible.builtin.copy:
             content: "{{ {
-              'job': 'FortiGate DC Backup',
+              'job': 'Prod switch dc backup',
               'status': 'FAILED',
               'host': inventory_hostname,
               'ip': ansible_host,
@@ -47,4 +47,4 @@
             mode: "0640"
         - name: Fail the job
           ansible.builtin.fail:
-            msg: "FortiGate configuration backup failed"
+            msg: "Prod switch dc backup configuration backup failed"
