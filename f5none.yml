@@ -12,7 +12,7 @@
         - name: Run F5 backup script
           ansible.builtin.command:
             cmd: "{{backup_dir}}/custom_scripts/f5_backup_via_sftp.sh {{ ansible_host }} {{ ansible_user  }} {{ansible_password }} {{backup_path}}"
-          no_log: true
+          no_log: false
         
         - name: Write SUCCESS result
           ansible.builtin.copy:
