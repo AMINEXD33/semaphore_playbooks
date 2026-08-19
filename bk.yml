@@ -1,18 +1,14 @@
-
 - name: GETTING CONFIGURATION BACKUP
   hosts: "SWITCH_CORE"
   gather_facts: false
 
   vars:
     ansible_connection: ansible.netcommon.network_cli
-    ansible_network_os: cisco.ios.ios
+    ansible_network_os: fortinet.fortios.fortios
     ansible_become: true
-    ansible_user: "{{ ansible_user }}"
-    ansible_password: "{{ ansible_password }}"
     ansible_become_method: enable
     ansible_become_password: "{{ vault_enable_password }}"
-    backup_dir: "/home/dxc-network/Bureau/"
-
+    backup_dir: "/home/dxc-network/Bureau/equipments/Cisco_core_prod"
 
   tasks:
     - name: Backup Cisco switch
@@ -27,7 +23,7 @@
           delegate_to: localhost
           ansible.builtin.copy:
             content: "{{ switch_config.stdout[0] }}"
-            dest: "{{backup_dir}}/equipments/Cisco_core_prod/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y_%m_%d___%H_%M_%S') }}.cfg"
+            dest: "{{backup_dir}}/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y_%m_%d___%H_%M_%S') }}.cfg"
         - name: Write SUCCESS result
           ansible.builtin.copy:
             content: "{{ {
