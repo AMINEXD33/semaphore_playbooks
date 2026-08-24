@@ -11,7 +11,7 @@
       block:
         - name: Run Dell fabric script
           ansible.builtin.command:
-            cmd: "{{backup_dir}}/custom_scripts/dell_fabric_os.sh {{ansible_host}} {{dell_user}} {{dell_pass}} {{server_ip}} {{server_user}} {{server_pass}} {{server_path}}"
+            cmd: "bash {{backup_dir}}/custom_scripts/dell_fabric_os.sh {{ansible_host}} {{dell_user}} {{dell_pass}} {{server_ip}} {{server_user}} {{server_pass}} {{server_path}}"
           no_log: false
         
         - name: Write SUCCESS result
