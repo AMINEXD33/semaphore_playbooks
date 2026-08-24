@@ -11,8 +11,15 @@
       block:
         - name: Run Dell fabric script
           ansible.builtin.command:
-            cmd: '{{backup_dir}}/custom_scripts/dell_fabric_os.sh "{{ansible_host}}" "{{dell_user}}" "{{dell_pass}}" "{{server_ip}}" "{{server_user}}" "{{server_pass}}" "{{server_path}}"'
-          no_log: false
+            cmd: "/home/dxc-network/Bureau/custom_scripts/dell_fabric_os.sh"
+          environment:
+            DELL_HOST: "{{ ansible_host }}"
+            DELL_USER: "{{ dell_user }}"
+            DELL_PASS: "{{ dell_pass }}"
+            SERVER_IP: "{{ server_ip }}"
+            SERVER_USER: "{{ server_user }}"
+            SERVER_PASS: "{{ server_pass }}"
+            SERVER_PATH: "{{ server_path }}"
         
         - name: Write SUCCESS result
           ansible.builtin.copy:
