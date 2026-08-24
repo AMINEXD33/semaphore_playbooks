@@ -22,7 +22,7 @@
               'host': inventory_hostname,
               'ip': ansible_host,
               'timestamp': now().strftime('%Y-%m-%d %H:%M:%S')} | to_nice_json }}"
-            dest: "{{ backup_dir }}/backup_results/{{dell_device}}.json"
+            dest: "{{ backup_dir }}/backup_results/{{FILE_HOST_TARGET}}.json"
             mode: "0640"
       rescue:
         - name: Write FAILED result
@@ -33,7 +33,7 @@
               'host': inventory_hostname,
               'ip': ansible_host,
               'timestamp': now().strftime('%Y-%m-%d %H:%M:%S')} | to_nice_json }}"
-            dest: "{{ backup_dir }}/backup_results/{{dell_device}}.json"
+            dest: "{{ backup_dir }}/backup_results/{{FILE_HOST_TARGET}}.json"
             mode: "0640"
         - name: Fail the job
           ansible.builtin.fail:
