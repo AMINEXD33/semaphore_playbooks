@@ -1,5 +1,5 @@
 - name: GETTING CONFIGURATION BACKUP
-  hosts: DELL_FABRIC_OS
+  hosts: {{FILE_HOST_TARGET}}
   gather_facts: false
   connection: local
 
