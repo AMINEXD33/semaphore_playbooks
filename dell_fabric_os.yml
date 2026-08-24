@@ -1,5 +1,5 @@
 - name: GETTING CONFIGURATION BACKUP
-  hosts: {{FILE_HOST_TARGET}}
+  hosts: FILE_HOST_TARGET
   gather_facts: false
   connection: local
 
