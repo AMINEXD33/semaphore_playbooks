@@ -1,0 +1,40 @@
+- name: GETTING CONFIGURATION BACKUP
+  hosts: DELL_FABRIC_OS
+  gather_facts: false
+  connection: local
+
+  vars:
+    backup_dir: "/home/dxc-network/Bureau"
+
+  tasks:
+    - name: Backup Dell fabric Os
+      block:
+        - name: Run Dell fabric script
+          ansible.builtin.command:
+            cmd: "{{backup_dir}}/custom_scripts/dell_fabric_os.sh {{ansible_host}} {{dell_user}} {{dell_pass}} {{server_ip}} {{server_user}} {{server_pass}} {{server_path}}"
+          no_log: false
+        
+        - name: Write SUCCESS result
+          ansible.builtin.copy:
+            content: "{{ {
+              'job': 'DELL FABRIC OS',
+              'status': 'SUCCESS',
+              'host': inventory_hostname,
+              'ip': ansible_host,
+              'timestamp': now().strftime('%Y-%m-%d %H:%M:%S')} | to_nice_json }}"
+            dest: "{{ backup_dir }}/backup_results/{{dell_device}}.json"
+            mode: "0640"
+      rescue:
+        - name: Write FAILED result
+          ansible.builtin.copy:
+            content: "{{ {
+              'job': 'DELL FABRIC OS',
+              'status': 'FAILED',
+              'host': inventory_hostname,
+              'ip': ansible_host,
+              'timestamp': now().strftime('%Y-%m-%d %H:%M:%S')} | to_nice_json }}"
+            dest: "{{ backup_dir }}/backup_results/{{dell_device}}.json"
+            mode: "0640"
+        - name: Fail the job
+          ansible.builtin.fail:
+            msg: "Dell device failed to backup"
