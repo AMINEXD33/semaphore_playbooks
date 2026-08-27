@@ -11,7 +11,7 @@
       block:
         - name: Run Dell fabric script
           ansible.builtin.command:
-            cmd: "bash -c 'cd /home/dxc-network/Bureau/custom_scripts && python dell_fabric_os.py {{ansible_host}} {{dell_user}} {{dell_pass}} {{server_ip}} {{server_user}} {{server_pass}} {{server_path}}'"        - name: Write SUCCESS result
+            cmd: bash -c 'cd /home/dxc-network/Bureau/custom_scripts && python dell_fabric_os.py "{{ansible_host}}" "{{dell_user}}" "{{dell_pass}}" "{{server_ip}}" "{{server_user}}" "{{server_pass}}" "{{server_path}}"'        - name: Write SUCCESS result
           ansible.builtin.copy:
             content: "{{ {
               'job': 'DELL FABRIC OS',
