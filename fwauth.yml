@@ -13,7 +13,7 @@
           ansible.builtin.uri:
             url: "https://{{ ansible_host }}/api/v1/recovery/"
             method: GET
-            user: "backup.forti"
+            user: "{{ forti_user }}"
             password: "{{ forti_token }}"
             validate_certs: false
             return_content: true
