@@ -1,0 +1,50 @@
+- name: GETTING CONFIGURATION BACKUP
+  hosts: "{{ FILE_HOST_TARGET }}"
+  gather_facts: false
+  connection: local
+
+  vars:
+    backup_dir: "/home/dxc-network/Bureau"
+
+  tasks:
+    - name: Backup FORTI Auth
+      block:
+        - name: Get Forti Auth configuration
+          ansible.builtin.uri:
+            url: "https://{{ ansible_host }}/api/v1/recovery/"
+            method: GET
+            user: "backup.forti"
+            password: "{{ forti_token }}"
+            validate_certs: false
+            return_content: true
+          register: forti_auth_config
+        - name: Save configuration backup
+          ansible.builtin.copy:
+            content: "{{ forti_auth_config.content }}"
+            dest: "{{ backup_dir }}/equipments/FortigateDC/Forti_auth__{{ lookup('pipe', 'date +%Y-%m-%d_%H-%M-%S') }}.conf"
+            mode: "0640"
+        - name: Write SUCCESS result
+          ansible.builtin.copy:
+            content: "{{ {
+              'job': 'Forti auth Backup',
+              'status': 'SUCCESS',
+              'host': inventory_hostname,
+              'ip': ansible_host,
+              'timestamp': now().strftime('%Y-%m-%d %H:%M:%S')} | to_nice_json }}"
+            dest: "{{ backup_dir }}/backup_results/{{ forti_auth_name }}.json"
+            mode: "0640"
+
+      rescue:
+        - name: Write FAILED result
+          ansible.builtin.copy:
+            content: "{{ {
+              'job': 'FortiGate DC Backup',
+              'status': 'FAILED',
+              'host': inventory_hostname,
+              'ip': ansible_host,
+              'timestamp': now().strftime('%Y-%m-%d %H:%M:%S')} | to_nice_json }}"
+            dest: "{{ backup_dir }}/backup_results/fgdc.json"
+            mode: "0640"
+        - name: Fail the job
+          ansible.builtin.fail:
+            msg: "FortiGate configuration backup failed"
