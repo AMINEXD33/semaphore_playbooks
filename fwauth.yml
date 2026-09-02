@@ -21,7 +21,7 @@
         - name: Save configuration backup
           ansible.builtin.copy:
             content: "{{ forti_auth_config.content }}"
-            dest: "{{ backup_dir }}/equipments/FortigateDC/Forti_auth__{{ lookup('pipe', 'date +%Y-%m-%d_%H-%M-%S') }}.conf"
+            dest: "{{ backup_dir }}/equipments/{{FORTI_AUTH_FOLDER}}/Forti_auth__{{ lookup('pipe', 'date +%Y-%m-%d_%H-%M-%S') }}.conf"
             mode: "0640"
         - name: Write SUCCESS result
           ansible.builtin.copy:
